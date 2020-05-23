@@ -1,0 +1,25 @@
+FROM amazonlinux:1
+
+RUN yum update -y \
+    && yum install -y gcc openssl-devel bzip2-devel libffi-devel wget zip \
+    && yum clean all -y \
+    && rm -rf /var/cache/yum
+
+RUN wget https://www.python.org/ftp/python/3.7.7/Python-3.7.7.tgz \
+    && tar -xzf Python-3.7.7.tgz \
+    && cd /Python-3.7.7 \
+    && ./configure \
+    && make altinstall \
+    && cd / \
+    && rm -rf /Python-3.7.7 Python-3.7.7.tgz \
+    && update-alternatives --install /usr/bin/python python /usr/local/bin/python3.7 2 \
+    && update-alternatives --set python /usr/local/bin/python3.7
+
+RUN wget https://bootstrap.pypa.io/get-pip.py \
+    && python /get-pip.py \
+    && rm /get-pip.py
+
+COPY builder-py37.sh /bin/builder.sh
+RUN chmod 755 /bin/builder.sh
+
+ENTRYPOINT [ "/bin/builder.sh" ]
